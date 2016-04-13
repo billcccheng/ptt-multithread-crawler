@@ -32,7 +32,8 @@ def crawler(PttName):
     g_id = 0;
     data = []
     for number in range(ALLpage, 0,-1):
-        res=rs.get('https://www.ptt.cc/bbs/'+PttName+'/index'+str(number)+'.html',verify=False)
+        _url = 'https://www.ptt.cc/bbs/'+PttName+'/index'+str(number)+'.html'
+        res=rs.get(_url,verify=False)
         soup = BeautifulSoup(res.text,'html.parser')
         for tag in soup.select('div.title'):
             try:
@@ -94,8 +95,8 @@ def parseGos(link , g_id, data):
     
         # json-data  type(d) dict
           
-        d={ "a_ID":g_id , "b_作者":author.encode('utf-8'), "c_標題":title.encode('utf-8'), "d_日期":date.encode('utf-8'),
-            "f_內文":main_content.encode('utf-8')}
+        d={ "ID":g_id , "作者":author.encode('utf-8'), "標題":title.encode('utf-8'), "日期":date.encode('utf-8'),
+            "內文":main_content.encode('utf-8'), "link":str(link) }
         json_data = json.dumps(d,ensure_ascii=False,indent=4,sort_keys=True)+','
         data.append(json_data)
         # store(json_data)
