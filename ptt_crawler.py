@@ -20,8 +20,8 @@ load={
 
 rs=requests.session()
 res=rs.post('https://www.ptt.cc/ask/over18',verify=False,data=load)
-FILENAME=""
-i = 0
+
+
 
 def PageCount(PttName):
     res=rs.get('https://www.ptt.cc/bbs/'+PttName+'/index.html',verify=False)
@@ -98,12 +98,11 @@ def getPageNumber(content) :
     return pageNumber
 
 def groupby(n, n_list):
-    count = 0
     grouped_list = []
     sublist = []
     for i in range(len(n_list) - 1):
-        sublist.append(n_list[i])
-        sublist.append(n_list[i+1]-1)
+        sublist.append(n_list[i]-1)
+        sublist.append(n_list[i+1])
         grouped_list.append(sublist)
         sublist = []
 
@@ -121,7 +120,7 @@ def crawler(PttName, begin, end, threadname):
         for tag in soup.select('div.title'):
             try:
                 atag=tag.find('a')
-                time=random.uniform(0, 1)/5
+                time=random.uniform(1, 10)/5
                 #print 'time:',time
                 sleep(time)
                 if(atag):
@@ -176,21 +175,12 @@ if __name__ == "__main__":
     # for number in range(len(all_page)):
     divide_pages = [x for x in range(all_page, 0, -all_page/10)]
     divide_pages_grouped = groupby(2, divide_pages)
-    # print divide_pages_grouped
+    print divide_pages_grouped
     for i in range(len(divide_pages_grouped)):
         thread = "thread"+str(i)
         thread = myThread(PttName, divide_pages_grouped[i][0], divide_pages_grouped[i][1], str(i))
+        print thread.threadname+" started"
         thread.start()
-    # thread2 = myThread("Gossiping")
-    print "Exited Thread"
-    # Start new Threads
-    # thread1.start()
-    # thread2.start()
-    # store(']') 
-   
 
-   # with open(FILENAME, 'r') as f:
-   #      p = f.read()
-   # with open(FILENAME, 'w') as f:
-   #      #f.write(p.replace(',]',']'))
-   #      f.write(p[:-2]+']') 
+    print "Exited Thread"
+
