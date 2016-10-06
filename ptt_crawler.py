@@ -97,7 +97,7 @@ def getPageNumber(content) :
     pageNumber = content[startIndex+5 : endIndex]
     return pageNumber
 
-def groupby(n, n_list):
+def groupby(n_list):
     grouped_list = []
     sublist = []
     for i in range(len(n_list) - 1):
@@ -170,12 +170,14 @@ if __name__ == "__main__":
     # FILENAME='data/data-'+ str(i) +'.json'
     # store('[') 
     print 'Start parsing [',PttName,']....'
-    # Create new threads
     all_page = PageCount(PttName)
+    # print all_page
+    # sys.exit()
     # for number in range(len(all_page)):
     divide_pages = [x for x in range(all_page, 0, -all_page/10)]
-    divide_pages_grouped = groupby(2, divide_pages)
+    divide_pages_grouped = groupby(divide_pages)
     print divide_pages_grouped
+    # Create new threads
     for i in range(len(divide_pages_grouped)):
         thread = "thread"+str(i)
         thread = myThread(PttName, divide_pages_grouped[i][0], divide_pages_grouped[i][1], str(i))
