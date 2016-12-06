@@ -1,4 +1,5 @@
 #coding=utf-8 
+#Last Parsing: page 1312 Dec 5
 import re
 import sys
 import json
@@ -21,7 +22,7 @@ load={
 rs=requests.session()
 res=rs.post('https://www.ptt.cc/ask/over18',verify=False,data=load)
 
-
+LAST_PAGED_PARSED = 1312
 
 def PageCount(PttName):
     res=rs.get('https://www.ptt.cc/bbs/'+PttName+'/index.html',verify=False)
@@ -57,32 +58,24 @@ def parseGos(link , g_id, data):
         num , g , b , n ,message = 0,0,0,0,{}
         
         for tag in soup.select('div.push'):
-                num += 1
-                push_tag = tag.find("span", {'class': 'push-tag'}).text
-                #print "push_tag:",push_tag
-                push_userid = tag.find("span", {'class': 'push-userid'}).text       
-                #print "push_userid:",push_userid
-                push_content = tag.find("span", {'class': 'push-content'}).text   
-                push_content = push_content[1:]
-                #print "push_content:",push_content
-                push_ipdatetime = tag.find("span", {'class': 'push-ipdatetime'}).text   
-                push_ipdatetime = remove(push_ipdatetime, '\n')
-                #print "push-ipdatetime:",push_ipdatetime 
+            num += 1
+            push_tag = tag.find("span", {'class': 'push-tag'}).text
+            #print "push_tag:",push_tag
+            push_userid = tag.find("span", {'class': 'push-userid'}).text       
+            #print "push_userid:",push_userid
+            push_content = tag.find("span", {'class': 'push-content'}).text   
+            push_content = push_content[1:]
+            #print "push_content:",push_content
+            push_ipdatetime = tag.find("span", {'class': 'push-ipdatetime'}).text   
+            push_ipdatetime = remove(push_ipdatetime, '\n')
+            #print "push-ipdatetime:",push_ipdatetime 
                 
-            
-  
-    
         # json-data  type(d) dict
           
         d={ "ID":g_id , "標題":title.encode('utf-8'), "日期":date.encode('utf-8'),
             "內文":main_content.encode('utf-8'), "link":str(link) }
         json_data = json.dumps(d,ensure_ascii=False,indent=4,sort_keys=True)+','
         data.append(json_data)
-        # store(json_data)
-        # print len(data)
-        # if len(data) == 10:
-        #     # store(data) 
-        #     data = []    
 
 
 def remove(value, deletechars):
@@ -101,19 +94,19 @@ def groupby(n_list):
     grouped_list = []
     sublist = []
     for i in range(len(n_list) - 1):
-        sublist.append(n_list[i]-1)
+        sublist.append(n_list[i])
         sublist.append(n_list[i+1])
         grouped_list.append(sublist)
         sublist = []
 
-    grouped_list.append([grouped_list[-1][-1] - 1, 0])
+    grouped_list.append([grouped_list[-1][-1], 0])
     # print n_list
     return grouped_list
 
 def crawler(PttName, begin, end, threadname):
-    g_id = 0;
+    g_id = 0
     data = []
-    for number in range(begin, end,-1):
+    for number in range(begin, end, -1):
         _url = 'https://www.ptt.cc/bbs/'+PttName+'/index'+str(number)+'.html'
         res=rs.get(_url,verify=False)
         soup = BeautifulSoup(res.text,'html.parser')
@@ -129,29 +122,19 @@ def crawler(PttName, begin, end, threadname):
                    #print link
                 g_id = g_id+1
                 parseGos(link, g_id, data)                     
+            except KeyboardInterrupt:
+              raise
             except:
-                print 'error:',URL
+                #print 'error:',URL
+                pass
         store(data, threadname)
         data = []
 
 def store(data, threadname):
-    print "Storing "+ threadname
+    #print "Storing "+ threadname
     FILENAME = 'data/data-' + threadname + '.json'
     with open(FILENAME, 'a') as f:
         f.write("\n".join(data))
-
-
-    # if(os.stat(FILENAME).st_size > 3000000):
-    #     with open(FILENAME, 'a') as f:
-    #         f.write("\n".join(data))
-    #         f.write(']')
-    #     i += 1
-    #     FILENAME = 'data/data-'+ str(i) +'.json'
-    #     with open(FILENAME, 'a') as f:
-    #         f.write('[')
-    # else:
-    #     with open(FILENAME, 'a') as f:
-    #         f.write("\n".join(data))
 
 
 class myThread(threading.Thread):
@@ -166,9 +149,6 @@ class myThread(threading.Thread):
 
 if __name__ == "__main__":  
     PttName = str(sys.argv[1])
-    # i = 1;
-    # FILENAME='data/data-'+ str(i) +'.json'
-    # store('[') 
     print 'Start parsing [',PttName,']....'
     all_page = PageCount(PttName)
     # print all_page
@@ -181,8 +161,8 @@ if __name__ == "__main__":
     for i in range(len(divide_pages_grouped)):
         thread = "thread"+str(i)
         thread = myThread(PttName, divide_pages_grouped[i][0], divide_pages_grouped[i][1], str(i))
-        print thread.threadname+" started"
+        #print thread.threadname+" started"
         thread.start()
 
-    print "Exited Thread"
+    #print "Exited Thread"
 
