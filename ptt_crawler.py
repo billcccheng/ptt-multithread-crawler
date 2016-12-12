@@ -103,9 +103,7 @@ def groupby(n_list):
     # print n_list
     return grouped_list
 
-def crawler(PttName, begin, end, threadname):
-    g_id = 0
-    data = []
+def crawler(PttName, begin, end, threadname, data, g_id):
     for number in range(begin, end, -1):
         _url = 'https://www.ptt.cc/bbs/'+PttName+'/index'+str(number)+'.html'
         res=rs.get(_url,verify=False)
@@ -122,20 +120,32 @@ def crawler(PttName, begin, end, threadname):
                    #print link
                 g_id = g_id+1
                 parseGos(link, g_id, data)                     
-            except KeyboardInterrupt:
-              raise
             except:
-                #print 'error:',URL
+#                print 'error:',URL
                 pass
         store(data, threadname)
         data = []
 
 def store(data, threadname):
-    #print "Storing "+ threadname
+#    print "Storing "+ threadname
     FILENAME = 'data/data-' + threadname + '.json'
     with open(FILENAME, 'a') as f:
+        if os.stat(FILENAME).st_size == 0:
+            f.write("[")
         f.write("\n".join(data))
 
+def addBrackets():
+    cwd = os.getcwd()
+    for _file in os.listdir(cwd + '/data'):
+        if(_file == ".DS_Store" or _file == "*.swp"):
+            continue
+        _file = cwd + '/data/' + _file
+        with open(_file, 'a') as myFile:
+            if os.stat(_file).st_size == 0:
+                myFile.write("[")
+            myFile.seek(-1, os.SEEK_END)
+            myFile.truncate()
+            myFile.write("]") 
 
 class myThread(threading.Thread):
     def __init__(self, PttName, begin, end, threadname):
@@ -144,9 +154,10 @@ class myThread(threading.Thread):
         self.begin = begin
         self.end = end
         self.threadname = threadname
+        self.data = list()
+        self.g_id = 0
     def run(self):
-        crawler(self.PttName, self.begin, self.end, self.threadname)
-
+        crawler(self.PttName, self.begin, self.end, self.threadname, self.data, self.g_id)
 if __name__ == "__main__":  
     PttName = str(sys.argv[1])
     print 'Start parsing [',PttName,']....'
@@ -158,11 +169,18 @@ if __name__ == "__main__":
     divide_pages_grouped = groupby(divide_pages)
     print divide_pages_grouped
     # Create new threads
+    threads = []
     for i in range(len(divide_pages_grouped)):
-        thread = "thread"+str(i)
-        thread = myThread(PttName, divide_pages_grouped[i][0], divide_pages_grouped[i][1], str(i))
-        #print thread.threadname+" started"
-        thread.start()
-
-    #print "Exited Thread"
+      thread = "thread"+str(i)
+      thread = myThread(PttName, divide_pages_grouped[i][0], divide_pages_grouped[i][1], str(i))
+      #print thread.threadname+" started"
+      threads.append(thread)
+    for x in threads:
+        print x.threadname + " Starting"
+        x.start()
+    for x in threads:
+        x.join()
+        print x.threadname + " Finished"   
+    addBrackets() 
+    print "Exited Thread"
 
