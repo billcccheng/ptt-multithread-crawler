@@ -31,6 +31,32 @@ def PageCount(PttName):
     ALLpage=int(getPageNumber(ALLpageURL))+1
     return  ALLpage 
 
+<<<<<<< Updated upstream
+=======
+def crawler(PttName):
+    ALLpage=PageCount(PttName)
+    g_id = 0;
+    data = []
+    for number in range(ALLpage, 0,-1):
+        res=rs.get('https://www.ptt.cc/bbs/'+PttName+'/index'+str(number)+'.html',verify=False)
+        soup = BeautifulSoup(res.text,'html.parser')
+        for tag in soup.select('div.title'):
+            try:
+                atag=tag.find('a')
+                time=random.uniform(0, 1)/5
+                #print 'time:',time
+                sleep(time)
+                if(atag):
+                   URL=atag['href']   
+                   link='https://www.ptt.cc'+URL
+                   #print link
+                g_id = g_id+1
+                parseGos(link, g_id, data)                     
+            except:
+                print 'error:',URL
+        store(data)
+        data = []
+>>>>>>> Stashed changes
 def parseGos(link , g_id, data):
         res=rs.get(link,verify=False)
         soup = BeautifulSoup(res.text,'html.parser')
@@ -76,7 +102,6 @@ def parseGos(link , g_id, data):
             "內文":main_content.encode('utf-8'), "link":str(link) }
         json_data = json.dumps(d,ensure_ascii=False,indent=4,sort_keys=True)+','
         data.append(json_data)
-
 
 def remove(value, deletechars):
     for c in deletechars:
