@@ -31,77 +31,47 @@ def PageCount(PttName):
     ALLpage=int(getPageNumber(ALLpageURL))+1
     return  ALLpage 
 
-<<<<<<< Updated upstream
-=======
-def crawler(PttName):
-    ALLpage=PageCount(PttName)
-    g_id = 0;
-    data = []
-    for number in range(ALLpage, 0,-1):
-        res=rs.get('https://www.ptt.cc/bbs/'+PttName+'/index'+str(number)+'.html',verify=False)
-        soup = BeautifulSoup(res.text,'html.parser')
-        for tag in soup.select('div.title'):
-            try:
-                atag=tag.find('a')
-                time=random.uniform(0, 1)/5
-                #print 'time:',time
-                sleep(time)
-                if(atag):
-                   URL=atag['href']   
-                   link='https://www.ptt.cc'+URL
-                   #print link
-                g_id = g_id+1
-                parseGos(link, g_id, data)                     
-            except:
-                print 'error:',URL
-        store(data)
-        data = []
->>>>>>> Stashed changes
 def parseGos(link , g_id, data):
-        res=rs.get(link,verify=False)
-        soup = BeautifulSoup(res.text,'html.parser')
-        # author
-        author  = soup.select('.article-meta-value')[0].text
-        #author = soup.find("span", {'class': 'article-meta-value'}).text              
-        #print 'author:',author
-        # title
-        title = soup.select('.article-meta-value')[2].text
-        #print 'title:',title
-        # date
-        date = soup.select('.article-meta-value')[3].text
-        #print 'date:',date
-        
-
-        # content
-        content = soup.find(id="main-content").text
-        target_content=u'※ 發信站: 批踢踢實業坊(ptt.cc),'
-        content = content.split(target_content)
-        content = content[0].split(date)
-        main_content = content[1].replace('\n', '  ').replace('\t', '  ')
-        #print 'content:',main_content
-        
-        # message
-        num , g , b , n ,message = 0,0,0,0,{}
-        
-        for tag in soup.select('div.push'):
-            num += 1
-            push_tag = tag.find("span", {'class': 'push-tag'}).text
-            #print "push_tag:",push_tag
-            push_userid = tag.find("span", {'class': 'push-userid'}).text       
-            #print "push_userid:",push_userid
-            push_content = tag.find("span", {'class': 'push-content'}).text   
-            push_content = push_content[1:]
-            #print "push_content:",push_content
-            push_ipdatetime = tag.find("span", {'class': 'push-ipdatetime'}).text   
-            push_ipdatetime = remove(push_ipdatetime, '\n')
-            #print "push-ipdatetime:",push_ipdatetime 
-                
-        # json-data  type(d) dict
-          
-        d={ "ID":g_id , "標題":title.encode('utf-8'), "日期":date.encode('utf-8'),
-            "內文":main_content.encode('utf-8'), "link":str(link) }
-        json_data = json.dumps(d,ensure_ascii=False,indent=4,sort_keys=True)+','
-        data.append(json_data)
+    res=rs.get(link,verify=False)
+    soup = BeautifulSoup(res.text,'html.parser')
+    # author
+    author  = soup.select('.article-meta-value')[0].text
+    #author = soup.find("span", {'class': 'article-meta-value'}).text              
+    # title
+    title = soup.select('.article-meta-value')[2].text
+    # date
+    date = soup.select('.article-meta-value')[3].text
+    #print 'date:',date
+    
+    # content
+    content = soup.find(id="main-content").text
+    target_content=u'※ 發信站: 批踢踢實業坊(ptt.cc),'
+    content = content.split(target_content)
+    content = content[0].split(date)
+    main_content = content[1].replace('\n', '  ').replace('\t', '  ')
+    #print 'content:',main_content
+    
+    # message
+    num, message = 0, [] 
+    for tag in soup.select('div.push'):
+        num += 1
+        push_tag = tag.find("span", {'class': 'push-tag'}).text
+        #print "push_tag:",push_tag
+        push_userid = tag.find("span", {'class': 'push-userid'}).text       
+        #print "push_userid:",push_userid
+        push_content = tag.find("span", {'class': 'push-content'}).text   
+        push_content = push_content[1:]
+        #print "push_content:",push_content
+        #push_ipdatetime = tag.find("span", {'class': 'push-ipdatetime'}).text   
+        #push_ipdatetime = remove(push_ipdatetime, '\n')
+        #print "push-ipdatetime:",push_ipdatetime 
+        #message[num]={"user_id":push_userid.encode('utf-8'),"push_content":push_content.encode('utf-8')} 
+        message.append(push_userid.encode('utf-8')+":"+push_content.encode('utf-8'))
+    # json-data  type(d) dict
+    d={"ID":g_id , "標題":title.encode('utf-8'),"作者":author.encode('utf-8'),
+            "內文":main_content.encode('utf-8'), "推文":message, "link":str(link) }
+    json_data = json.dumps(d,ensure_ascii=False,indent=4,sort_keys=True)+','
+    data.append(json_data)
 
 def remove(value, deletechars):
     for c in deletechars:
@@ -128,7 +98,8 @@ def groupby(n_list):
     # print n_list
     return grouped_list
 
-def crawler(PttName, begin, end, threadname, data, g_id):
+def crawler(PttName, begin, end, threadname, g_id, data):
+#    g_id, data = 0, []
     for number in range(begin, end, -1):
         _url = 'https://www.ptt.cc/bbs/'+PttName+'/index'+str(number)+'.html'
         res=rs.get(_url,verify=False)
@@ -182,7 +153,7 @@ class myThread(threading.Thread):
         self.data = list()
         self.g_id = 0
     def run(self):
-        crawler(self.PttName, self.begin, self.end, self.threadname, self.data, self.g_id)
+        crawler(self.PttName, self.begin, self.end, self.threadname, self.g_id, self.data)
 if __name__ == "__main__":  
     PttName = str(sys.argv[1])
     print 'Start parsing [',PttName,']....'
