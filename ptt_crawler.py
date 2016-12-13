@@ -69,7 +69,7 @@ def parseGos(link , g_id, data):
         message.append(push_userid.encode('utf-8')+":"+push_content.encode('utf-8'))
     # json-data  type(d) dict
     d={"ID":g_id , "標題":title.encode('utf-8'),"作者":author.encode('utf-8'),
-            "內文":main_content.encode('utf-8'), "推文":message, "link":str(link) }
+            "內文":main_content.encode('utf-8'), "推文":" ".join(message), "link":str(link) }
     json_data = json.dumps(d,ensure_ascii=False,indent=4,sort_keys=True)+','
     data.append(json_data)
 
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     # print all_page
     # sys.exit()
     # for number in range(len(all_page)):
-    divide_pages = [x for x in range(all_page, 0, -all_page/50)]
+    divide_pages = [x for x in range(all_page, 0, -all_page/60)]
     divide_pages_grouped = groupby(divide_pages)
     print divide_pages_grouped
     # Create new threads
