@@ -161,7 +161,7 @@ if __name__ == "__main__":
     # print all_page
     # sys.exit()
     # for number in range(len(all_page)):
-    divide_pages = [x for x in range(all_page, 0, -all_page/10)]
+    divide_pages = [x for x in range(all_page, 0, -all_page/50)]
     divide_pages_grouped = groupby(divide_pages)
     print divide_pages_grouped
     # Create new threads
