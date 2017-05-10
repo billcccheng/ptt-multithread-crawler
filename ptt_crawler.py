@@ -55,7 +55,7 @@ def parseGos(link , g_id, data):
     num, message = 0, [] 
     for tag in soup.select('div.push'):
         num += 1
-        push_tag = tag.find("span", {'class': 'push-tag'}).text
+        # push_tag = tag.find("span", {'class': 'push-tag'}).text
         #print "push_tag:",push_tag
         push_userid = tag.find("span", {'class': 'push-userid'}).text       
         #print "push_userid:",push_userid
@@ -68,7 +68,7 @@ def parseGos(link , g_id, data):
         #message[num]={"user_id":push_userid.encode('utf-8'),"push_content":push_content.encode('utf-8')} 
         message.append(push_userid.encode('utf-8')+":"+push_content.encode('utf-8'))
     # json-data  type(d) dict
-    d={"ID":g_id , "標題":title.encode('utf-8'),"作者":author.encode('utf-8'),
+    d={"ID":g_id , "日期":date.encode('utf-8'), "標題":title.encode('utf-8'),"作者":author.encode('utf-8'),
             "內文":main_content.encode('utf-8'), "推文":" ".join(message), "link":str(link) }
     json_data = json.dumps(d,ensure_ascii=False,indent=4,sort_keys=True)+','
     data.append(json_data)
@@ -155,7 +155,7 @@ class myThread(threading.Thread):
     def run(self):
         crawler(self.PttName, self.begin, self.end, self.threadname, self.g_id, self.data)
 if __name__ == "__main__":  
-    PttName = str(sys.argv[1])
+    PttName = "studyabroad" 
     print 'Start parsing [',PttName,']....'
     all_page = PageCount(PttName)
     # print all_page
