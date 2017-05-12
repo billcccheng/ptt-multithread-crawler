@@ -155,7 +155,7 @@ class myThread(threading.Thread):
     def run(self):
         crawler(self.PttName, self.begin, self.end, self.threadname, self.g_id, self.data)
 if __name__ == "__main__":  
-    PttName = "studyabroad" 
+    PttName = str(sys.argv[1]) 
     print 'Start parsing [',PttName,']....'
     all_page = PageCount(PttName)
     # print all_page
