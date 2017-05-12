@@ -69,7 +69,7 @@ def parseGos(link , g_id, data):
         message.append(push_userid.encode('utf-8')+":"+push_content.encode('utf-8'))
     # json-data  type(d) dict
     d={"ID":g_id , "日期":date.encode('utf-8'), "標題":title.encode('utf-8'),"作者":author.encode('utf-8'),
-            "內文":main_content.encode('utf-8'), "推文":" ".join(message), "link":str(link) }
+            "內文":main_content.encode('utf-8'), "推文":" ".join(message).encode('utf-8'), "link":str(link).encode('utf-8') }
     json_data = json.dumps(d,ensure_ascii=False,indent=4,sort_keys=True)+','
     data.append(json_data)
 
