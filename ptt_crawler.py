@@ -104,6 +104,7 @@ def crawler(PTT_board, begin, end, threadname, g_id, data):
         store(data, threadname, PTT_board)
 
 def store(data, threadname, PTT_board):
+    PTT_board = PTT_board.lower()
     if not os.path.exists(PTT_board):
         os.makedirs(PTT_board)
     FILENAME = PTT_board + '/data-' + threadname + '.json'
