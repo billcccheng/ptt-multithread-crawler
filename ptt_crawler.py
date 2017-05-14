@@ -99,8 +99,8 @@ def groupby(n_list):
     return grouped_list
 
 def crawler(PttName, begin, end, threadname, g_id, data):
-#    g_id, data = 0, []
     for number in range(begin, end, -1):
+        seen = {}
         _url = 'https://www.ptt.cc/bbs/'+PttName+'/index'+str(number)+'.html'
         res=rs.get(_url,verify=False)
         soup = BeautifulSoup(res.text,'html.parser')
@@ -108,16 +108,13 @@ def crawler(PttName, begin, end, threadname, g_id, data):
             try:
                 atag=tag.find('a')
                 time=random.uniform(1, 10)/5
-                #print 'time:',time
                 sleep(time)
                 if(atag):
-                   URL=atag['href']   
-                   link='https://www.ptt.cc'+URL
-                   #print link
+                    URL=atag['href'].strip()   
+                    link='https://www.ptt.cc'+URL
                 g_id = g_id+1
                 parseGos(link, g_id, data)                     
             except:
-#                print 'error:',URL
                 pass
         store(data, threadname)
         data = []
