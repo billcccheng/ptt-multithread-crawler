@@ -1,5 +1,4 @@
 #coding=utf-8 
-#Last Parsing: page 1312 Dec 5
 import re
 import sys
 import json
@@ -22,8 +21,6 @@ load={
 rs=requests.session()
 res=rs.post('https://www.ptt.cc/ask/over18',verify=False,data=load)
 
-LAST_PAGED_PARSED = 1312
-
 def PageCount(PTT_board):
     res=rs.get('https://www.ptt.cc/bbs/'+PTT_board+'/index.html',verify=False)
     soup=BeautifulSoup(res.text,'html.parser')
@@ -31,34 +28,6 @@ def PageCount(PTT_board):
     ALLpage=int(getPageNumber(ALLpageURL))+1
     return  ALLpage 
 
-def parseGos(link , g_id, data):
-    res=rs.get(link,verify=False)
-    soup = BeautifulSoup(res.text,'html.parser')
-    # author
-    author  = soup.select('.article-meta-value')[0].text
-    # title
-    title = soup.select('.article-meta-value')[2].text
-    # date
-    date = soup.select('.article-meta-value')[3].text
-    # content
-    content = soup.find(id="main-content").text
-    target_content=u'※ 發信站: 批踢踢實業坊(ptt.cc),'
-    content = content.split(target_content)
-    content = content[0].split(date)
-    main_content = content[1].replace('\n', '  ').replace('\t', '  ')
-    
-    # message
-    num, message = 0, [] 
-    for tag in soup.select('div.push'):
-        num += 1
-        push_userid = tag.find("span", {'class': 'push-userid'}).text       
-        push_content = tag.find("span", {'class': 'push-content'}).text   
-        push_content = push_content[1:]
-        message.append(push_userid.encode('utf-8')+":"+push_content.encode('utf-8'))
-    d={"ID":g_id , "日期":date.encode('utf-8'), "標題":title.encode('utf-8'),"作者":author.encode('utf-8'),
-            "內文":main_content.encode('utf-8'), "推文":" ".join(message), "link":str(link) }
-    json_data = json.dumps(d,ensure_ascii=False,indent=2,sort_keys=True)+','
-    data.append(json_data)
 
 def remove(value, deletechars):
     for c in deletechars:
@@ -82,25 +51,73 @@ def groupby(n_list):
     grouped_list.append([grouped_list[-1][-1], 0])
     return grouped_list
 
-def crawler(PTT_board, begin, end, threadname, g_id, data):
+def parseGos(link , g_id, data):
+    res=rs.get(link,verify=False)
+    soup = BeautifulSoup(res.text,'html.parser')
+    # author
+    try:
+        author = soup.select('.article-meta-value')[0].text
+    except:
+        author = ""
+    # title
+    try:
+        title = soup.select('.article-meta-value')[2].text
+    except:
+        title = ""
+    # date
+    try:
+        date = soup.select('.article-meta-value')[3].text
+    except:
+        date = ""
+    # content
+    content = soup.find(id="main-content").text
+    target_content=u'※ 發信站: 批踢踢實業坊(ptt.cc),'
+    content = content.split(target_content)
+    content = content[0].split(date)
+    main_content = content[1].replace('\n', '  ').replace('\t', '  ')
+    
+    # message
+    num, message = 0, [] 
+    for tag in soup.select('div.push'):
+        num += 1
+        push_userid = tag.find("span", {'class': 'push-userid'}).text       
+        push_content = tag.find("span", {'class': 'push-content'}).text   
+        push_content = push_content[1:]
+        message.append(push_userid.encode('utf-8')+":"+push_content.encode('utf-8'))
+    d={"ID":g_id , "日期":date.encode('utf-8'), "標題":title.encode('utf-8'),"作者":author.encode('utf-8'),
+            "內文":main_content.encode('utf-8'), "推文":" ".join(message), "link":str(link) }
+    json_data = json.dumps(d,ensure_ascii=False,indent=2,sort_keys=True)+','
+    data.append(json_data)
+
+def crawler(PTT_board, begin, end, threadname, g_id, data, links):
+    class bcolors:
+	OKGREEN = '\033[92m'
+	WARNING = '\033[93m'
+	FAIL = '\033[91m'
+	ENDC = '\033[0m'
+
     for number in range(begin, end, -1):
-        seen = {}
         _url = 'https://www.ptt.cc/bbs/'+PTT_board+'/index'+str(number)+'.html'
         res=rs.get(_url,verify=False)
         soup = BeautifulSoup(res.text,'html.parser')
-        data = []
+        data, links = [], []
+
         for tag in soup.select('div.title'):
             try:
                 atag=tag.find('a')
-                time=random.uniform(1, 10)/5
-                sleep(time)
                 if(atag):
                     URL=atag['href'].strip()   
                     link='https://www.ptt.cc'+URL
-                g_id = g_id+1
-                parseGos(link, g_id, data)                     
+                    links.append(link)
+                # g_id = g_id+1
             except:
                 pass
+        for g_id, link in enumerate(links):
+            try:
+                parseGos(link, g_id, data)                     
+            except:
+                print bcolors.FAIL + "Error: " + link + bcolors.ENDC
+                # pass
         store(data, threadname, PTT_board)
 
 def store(data, threadname, PTT_board):
@@ -134,9 +151,10 @@ class myThread(threading.Thread):
         self.end = end
         self.threadname = threadname
         self.data = list()
+        self.links = list()
         self.g_id = 0
     def run(self):
-        crawler(self.PTT_board, self.begin, self.end, self.threadname, self.g_id, self.data)
+        crawler(self.PTT_board, self.begin, self.end, self.threadname, self.g_id, self.data, self.links)
 if __name__ == "__main__":  
     PTT_board = str(sys.argv[1]) 
     print 'Start parsing [',PTT_board,']....'
@@ -152,11 +170,11 @@ if __name__ == "__main__":
       thread = myThread(PTT_board, divide_pages[0], divide_pages[1], str(i))
       threads.append(thread)
     for x in threads:
-        print x.threadname + " Starting"
+        print "Thread-" + x.threadname + " Starting"
         x.start()
     for x in threads:
         x.join()
-        print x.threadname + " Finished"   
+        print "Thread-" + x.threadname + " Finished"   
     addBrackets(PTT_board) 
     print "Exited Thread"
 
