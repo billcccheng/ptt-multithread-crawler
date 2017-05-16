@@ -29,6 +29,7 @@ def PageCount(PTT_board):
     return  ALLpage 
 
 def parseGos(link , g_id, data):
+    print link
     res=rs.get(link,verify=False)
     soup = BeautifulSoup(res.text,'html.parser')
     # author
@@ -52,9 +53,16 @@ def parseGos(link , g_id, data):
         push_content = tag.find("span", {'class': 'push-content'}).text   
         push_content = push_content[1:]
         message.append(push_userid.encode('utf-8')+":"+push_content.encode('utf-8'))
-    d={"ID":g_id , "日期":date.encode('utf-8'), "標題":title.encode('utf-8'),"作者":author.encode('utf-8'),
-            "內文":main_content.encode('utf-8'), "推文":" ".join(message), "link":str(link) }
-    json_data = json.dumps(d,ensure_ascii=False,indent=2,sort_keys=True)+','
+    d={
+       "ID":g_id ,
+       "date":date.encode('utf-8'),
+       "title":title.encode('utf-8'),
+       "author":author.encode('utf-8'),
+       "content":main_content.encode('utf-8'),
+       "message":" ".join(message),
+       "link":str(link)
+       }
+    json_data = json.dumps(d,ensure_ascii=False,sort_keys=True)+','
     data.append(json_data)
 
 def remove(value, deletechars):
@@ -138,7 +146,7 @@ if __name__ == "__main__":
     PTT_board = str(sys.argv[1]) 
     print 'Start parsing [',PTT_board,']....'
     all_page = PageCount(PTT_board)
-    divide_pages = [x for x in range(all_page, 0, -all_page/60)]
+    divide_pages = [x for x in range(all_page, 0, -all_page/150)]
     divide_pages_grouped = groupby(divide_pages)
     print divide_pages_grouped
 
