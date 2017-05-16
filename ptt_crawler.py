@@ -14,14 +14,7 @@ from bs4 import BeautifulSoup
 from six import u
 requests.packages.urllib3.disable_warnings()
 
-# PTT_board=""
-# load={
-# 'from':'/bbs/'+PTT_board+'/index.html',
-# 'yes':'yes' 
-# }
-
 rs=requests.session()
-# res=rs.post('https://www.ptt.cc/ask/over18',verify=False,data=load)
 
 def PageCount(PTT_board):
     res=rs.get('https://www.ptt.cc/bbs/'+PTT_board+'/index.html',verify=False)
@@ -103,18 +96,17 @@ def crawler(PTT_board, begin, end, thread_number, data):
         for tag in soup.select('div.title'):
             try:
                 atag=tag.find('a')
-                time=random.uniform(1, 10)/5
+                time=random.uniform(1, 5)/5
                 sleep(time)
                 if(atag):
                     URL=atag['href'].strip()   
                     link='https://www.ptt.cc'+URL
                     parseGos(link, data)                     
             except Exception, err:
-                print '\033[91m'+ err + '\033[0m'
+                print '\033[91m'+ str(err) + '\033[0m'
         store(data, thread_number, PTT_board)
 
 def store(data, thread_number, PTT_board):
-    PTT_board = PTT_board.lower()
     print '\033[91m' + "Storing Thread-" + thread_number + '\033[0m'
     if not os.path.exists(PTT_board):
         os.makedirs(PTT_board)
@@ -168,8 +160,9 @@ class myThread(threading.Thread):
         self.data = list()
     def run(self):
         crawler(self.PTT_board, self.begin, self.end, self.thread_number, self.data)
+
 if __name__ == "__main__":  
-    PTT_board = str(sys.argv[1]) 
+    PTT_board = str(sys.argv[1]).lower() 
     print 'Start parsing [',PTT_board,']....'
     all_page = PageCount(PTT_board)
     divide_pages = [x for x in range(all_page, 0, -all_page/100)]
