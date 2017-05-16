@@ -90,7 +90,7 @@ def parseGos(link , data_to_store):
         'date': date,
         'content': content,
         'ip': ip,
-        'messages': messages
+        'messages': " ".join(messages)
     }
     data_to_store.append(json.dumps(data, sort_keys=False, ensure_ascii=False)+",")
 
