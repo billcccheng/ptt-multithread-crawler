@@ -32,13 +32,14 @@ def parse_link(link , data_to_store):
     soup = BeautifulSoup(resp.text, 'html.parser')
     main_content = soup.find(id="main-content")
     metas = main_content.select('div.article-metaline')
-    author = ''
-    title = ''
-    date = ''
+    author, title, date = '', '', ''
     if metas:
-        author = metas[0].select('span.article-meta-value')[0].string if metas[0].select('span.article-meta-value')[0] else author
-        title = metas[1].select('span.article-meta-value')[0].string if metas[1].select('span.article-meta-value')[0] else title
-        date = metas[2].select('span.article-meta-value')[0].string if metas[2].select('span.article-meta-value')[0] else date
+        _author=  metas[0].select('span.article-meta-value')[0]
+        _title =  metas[1].select('span.article-meta-value')[0]
+        _date  =  metas[2].select('span.article-meta-value')[0]
+        author =  _author.string if _author else author
+        title  =  _title.string if _title else title
+        date   =  _date.string if _date else date
 
         # remove meta nodes
         for meta in metas:
@@ -163,9 +164,10 @@ class myThread(threading.Thread):
 
 if __name__ == "__main__":  
     PTT_board = str(sys.argv[1]).lower() 
+    thread_num = int(sys.argv[2])
     print 'Start parsing [',PTT_board,']....'
     all_page = page_count(PTT_board)
-    divide_pages = [x for x in range(all_page, 0, -all_page/100)]
+    divide_pages = [x for x in range(all_page, 0, -all_page/thread_num)]
     divide_pages_grouped = group_by(divide_pages)
     print divide_pages_grouped
 
