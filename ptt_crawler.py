@@ -16,14 +16,14 @@ requests.packages.urllib3.disable_warnings()
 
 rs=requests.session()
 
-def PageCount(PTT_board):
-    res=rs.get('https://www.ptt.cc/bbs/'+PTT_board+'/index.html',verify=False)
-    soup=BeautifulSoup(res.text,'html.parser')
-    ALLpageURL = soup.select('.btn.wide')[1]['href']
-    ALLpage=int(getPageNumber(ALLpageURL))+1
-    return  ALLpage 
+def page_count(PTT_board):
+    res = rs.get('https://www.ptt.cc/bbs/'+PTT_board+'/index.html',verify=False)
+    soup = BeautifulSoup(res.text,'html.parser')
+    all_page_url = soup.select('.btn.wide')[1]['href']
+    all_page=int(get_page_num(all_page_url))+1
+    return  all_page 
 
-def parseGos(link , data_to_store):
+def parse_link(link , data_to_store):
     print link
     resp = requests.get(url=link, cookies={'over18': '1'}, verify=False)
     if resp.status_code != 200:
@@ -95,18 +95,18 @@ def crawler(PTT_board, begin, end, thread_number, data):
         data = []
         for tag in soup.select('div.title'):
             try:
-                atag=tag.find('a')
-                time=random.uniform(1, 5)/5
+                atag = tag.find('a')
+                time = random.uniform(1, 5)/5
                 sleep(time)
                 if(atag):
                     URL=atag['href'].strip()   
                     link='https://www.ptt.cc'+URL
-                    parseGos(link, data)                     
+                    parse_link(link, data)                     
             except Exception, err:
                 print '\033[91m'+ str(err) + '\033[0m'
-        store(data, thread_number, PTT_board)
+        store_file(data, thread_number, PTT_board)
 
-def store(data, thread_number, PTT_board):
+def store_file(data, thread_number, PTT_board):
     print '\033[91m' + "Storing Thread-" + thread_number + '\033[0m'
     if not os.path.exists(PTT_board):
         os.makedirs(PTT_board)
@@ -121,13 +121,13 @@ def remove(value, deletechars):
         value = value.replace(c,'')
     return value.rstrip();
 
-def getPageNumber(content) :
-    startIndex = content.find('index')
-    endIndex = content.find('.html')
-    pageNumber = content[startIndex+5 : endIndex]
-    return pageNumber
+def get_page_num(content) :
+    start_index = content.find('index')
+    end_index = content.find('.html')
+    page_num = content[start_index+5 : end_index]
+    return page_num
 
-def groupby(n_list):
+def group_by(n_list):
     grouped_list = []
     for i in range(len(n_list) - 1):
         start, end = n_list[i], n_list[i+1]
@@ -137,18 +137,18 @@ def groupby(n_list):
     grouped_list.append([grouped_list[-1][-1], 0])
     return grouped_list
 
-def addBrackets(PTT_board):
+def add_brackets(PTT_board):
     cwd = os.getcwd()
     for _file in os.listdir(cwd + '/' + PTT_board):
         if(_file == ".DS_Store" or _file == "*.swp"):
             continue
         _file = cwd + '/' + PTT_board + '/' + _file
-        with open(_file, 'a') as myFile:
+        with open(_file, 'a') as my_file:
             if os.stat(_file).st_size == 0:
-                myFile.write("[")
-            myFile.seek(-1, os.SEEK_END)
-            myFile.truncate()
-            myFile.write("]") 
+                my_file.write("[")
+            my_file.seek(-1, os.SEEK_END)
+            my_file.truncate()
+            my_file.write("]") 
 
 class myThread(threading.Thread):
     def __init__(self, PTT_board, begin, end, thread_number):
@@ -164,9 +164,9 @@ class myThread(threading.Thread):
 if __name__ == "__main__":  
     PTT_board = str(sys.argv[1]).lower() 
     print 'Start parsing [',PTT_board,']....'
-    all_page = PageCount(PTT_board)
+    all_page = page_count(PTT_board)
     divide_pages = [x for x in range(all_page, 0, -all_page/100)]
-    divide_pages_grouped = groupby(divide_pages)
+    divide_pages_grouped = group_by(divide_pages)
     print divide_pages_grouped
 
     # Create new threads
@@ -181,6 +181,6 @@ if __name__ == "__main__":
     for x in threads:
         x.join()
         print "Thread-" + x.thread_number + " Finished"
-    addBrackets(PTT_board) 
+    add_brackets(PTT_board) 
     print "Exited Thread"
 
