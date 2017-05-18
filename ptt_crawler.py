@@ -3,7 +3,6 @@ import re
 import sys
 import json
 import requests
-import io
 import threading
 import os
 import random
@@ -13,7 +12,6 @@ from datetime import datetime
 from bs4 import BeautifulSoup  
 from six import u
 requests.packages.urllib3.disable_warnings()
-
 rs=requests.session()
 
 def page_count(PTT_board):
@@ -97,7 +95,7 @@ def crawler(PTT_board, begin, end, thread_number, data):
         for tag in soup.select('div.title'):
             try:
                 atag = tag.find('a')
-                time = random.uniform(1, 5)/5
+                time = random.uniform(1, 10)/5
                 sleep(time)
                 if(atag):
                     URL=atag['href'].strip()   
@@ -108,7 +106,7 @@ def crawler(PTT_board, begin, end, thread_number, data):
         store_file(data, thread_number, PTT_board)
 
 def store_file(data, thread_number, PTT_board):
-    print '\033[91m' + "Storing Thread-" + thread_number + '\033[0m'
+    print '\033[93m' + "Storing Thread-" + thread_number + '\033[0m'
     if not os.path.exists(PTT_board):
         os.makedirs(PTT_board)
     FILENAME = PTT_board + '/data-' + thread_number + '.json'
@@ -184,5 +182,5 @@ if __name__ == "__main__":
         x.join()
         print "Thread-" + x.thread_number + " Finished"
     add_brackets(PTT_board) 
-    print "Exited Thread"
+    print "Finished Crawling " + PTT_board
 
