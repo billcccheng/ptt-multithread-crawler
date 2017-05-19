@@ -2,11 +2,15 @@
 This is a multithreaded crawler that crawls all the articles of the board you specified.
 
 ## How to use
-`python ptt_crawler.py <target-board> <thread-number>`
+```
+python ptt_crawler.py <target-board> <thread-number>
+```
 
 e.g. Want to crawl tech_job board with 100 threads. 
 
-`python ptt_crawler.py tech_job 100`
+```
+python ptt_crawler.py tech_job 100
+```
 
 Each threads will store the data it crawled in 
 their own files. Thread-1 will store the data in data-1.json and so on.
