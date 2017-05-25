@@ -82,7 +82,7 @@ def parse_link(link , data_to_store):
         'date': date,
         'content': content,
         'ip': ip,
-        'messages': " ".join(messages)
+        'messages': messages
     }
     data_to_store.append(json.dumps(data, sort_keys=False, ensure_ascii=False)+",")
 
