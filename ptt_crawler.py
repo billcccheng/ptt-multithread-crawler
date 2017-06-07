@@ -15,7 +15,7 @@ requests.packages.urllib3.disable_warnings()
 rs=requests.session()
 
 def page_count(PTT_board):
-    res = rs.get('https://www.ptt.cc/bbs/'+PTT_board+'/index.html',verify=False)
+    res = rs.get('https://www.ptt.cc/bbs/'+PTT_board+'/index.html', cookies={'over18': '1'}, verify=False)
     soup = BeautifulSoup(res.text,'html.parser')
     all_page_url = soup.select('.btn.wide')[1]['href']
     all_page=int(get_page_num(all_page_url))+1
@@ -28,6 +28,7 @@ def parse_link(link , data_to_store):
         print('invalid url:', resp.url)
         return json.dumps({"error": "invalid url"}, sort_keys=True, ensure_ascii=False)
     soup = BeautifulSoup(resp.text, 'html.parser')
+    # print soup
     main_content = soup.find(id="main-content")
     metas = main_content.select('div.article-metaline')
     author, title, date = '', '', ''
@@ -89,7 +90,7 @@ def parse_link(link , data_to_store):
 def crawler(PTT_board, begin, end, thread_number, data):
     for number in range(begin, end, -1):
         _url = 'https://www.ptt.cc/bbs/'+PTT_board+'/index'+str(number)+'.html'
-        res=rs.get(_url,verify=False)
+        res=rs.get(_url, cookies={'over18': '1'}, verify=False)
         soup = BeautifulSoup(res.text,'html.parser')
         data = []
         for tag in soup.select('div.title'):
