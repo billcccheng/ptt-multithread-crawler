@@ -22,7 +22,7 @@ def page_count(PTT_board):
     return  all_page 
 
 def parse_link(link , data_to_store):
-    print link
+    # print link
     resp = requests.get(url=link, cookies={'over18': '1'}, verify=False)
     if resp.status_code != 200:
         print('invalid url:', resp.url)
@@ -89,6 +89,7 @@ def parse_link(link , data_to_store):
 
 def crawler(PTT_board, begin, end, thread_number, data):
     for number in range(begin, end, -1):
+        print "\033[93mThread number-" + thread_number + ": " + str("{0:.2f}".format(float(begin-number+1)*100/(begin-end+1))) + "%\033[93m" 
         _url = 'https://www.ptt.cc/bbs/'+PTT_board+'/index'+str(number)+'.html'
         res=rs.get(_url, cookies={'over18': '1'}, verify=False)
         soup = BeautifulSoup(res.text,'html.parser')
@@ -96,8 +97,8 @@ def crawler(PTT_board, begin, end, thread_number, data):
         for tag in soup.select('div.title'):
             try:
                 atag = tag.find('a')
-                time = random.uniform(1, 10)/5
-                sleep(time)
+                # time = random.uniform(1, 10)/5
+								# sleep(0.1)
                 if(atag):
                     URL=atag['href'].strip()   
                     link='https://www.ptt.cc'+URL
@@ -107,7 +108,7 @@ def crawler(PTT_board, begin, end, thread_number, data):
         store_file(data, thread_number, PTT_board)
 
 def store_file(data, thread_number, PTT_board):
-    print '\033[93m' + "Storing Thread-" + thread_number + '\033[0m'
+    # print '\033[93m' + "Storing Thread-" + thread_number + '\033[0m'
     if not os.path.exists(PTT_board):
         os.makedirs(PTT_board)
     FILENAME = PTT_board + '/data-' + thread_number + '.json'
@@ -115,11 +116,6 @@ def store_file(data, thread_number, PTT_board):
         if os.stat(FILENAME).st_size == 0:
             f.write("[")
         f.write("\n".join(data))
-
-def remove(value, deletechars):
-    for c in deletechars:
-        value = value.replace(c,'')
-    return value.rstrip();
 
 def get_page_num(content) :
     start_index = content.find('index')
@@ -168,7 +164,7 @@ if __name__ == "__main__":
     all_page = page_count(PTT_board)
     divide_pages = [x for x in range(all_page, 0, -all_page/thread_num)]
     divide_pages_grouped = group_by(divide_pages)
-    print divide_pages_grouped
+    # print divide_pages_grouped
 
     # Create new threads
     threads = []
@@ -177,7 +173,7 @@ if __name__ == "__main__":
       thread = myThread(PTT_board, divide_pages[0], divide_pages[1], str(i))
       threads.append(thread)
     for x in threads:
-        print "Thread-" + x.thread_number + " Starting"
+        # print "Thread-" + x.thread_number + " Starting"
         x.start()
     for x in threads:
         x.join()
