@@ -1,4 +1,4 @@
-#coding=utf-8 
+#coding=utf-8
 import re
 import sys
 import json
@@ -9,7 +9,7 @@ import random
 import codecs
 from time import sleep
 from datetime import datetime
-from bs4 import BeautifulSoup  
+from bs4 import BeautifulSoup
 from six import u
 requests.packages.urllib3.disable_warnings()
 rs=requests.session()
@@ -19,7 +19,7 @@ def page_count(PTT_board):
     soup = BeautifulSoup(res.text,'html.parser')
     all_page_url = soup.select('.btn.wide')[1]['href']
     all_page=int(get_page_num(all_page_url))+1
-    return  all_page 
+    return  all_page
 
 def parse_link(link , data_to_store):
     # print link
@@ -89,7 +89,7 @@ def parse_link(link , data_to_store):
 
 def crawler(PTT_board, begin, end, thread_number, data):
     for number in range(begin, end, -1):
-        print "\033[93mThread number-" + thread_number + ": " + str("{0:.2f}".format(float(begin-number+1)*100/(begin-end+1))) + "%\033[93m" 
+        print "\033[93mThread number-" + thread_number + ": " + str("{0:.2f}".format(float(begin-number+1)*100/(begin-end+1))) + "%\033[93m"
         _url = 'https://www.ptt.cc/bbs/'+PTT_board+'/index'+str(number)+'.html'
         res=rs.get(_url, cookies={'over18': '1'}, verify=False)
         soup = BeautifulSoup(res.text,'html.parser')
@@ -98,9 +98,9 @@ def crawler(PTT_board, begin, end, thread_number, data):
             try:
                 atag = tag.find('a')
                 if(atag):
-                    URL=atag['href'].strip()   
+                    URL=atag['href'].strip()
                     link='https://www.ptt.cc'+URL
-                    parse_link(link, data)                     
+                    parse_link(link, data)
             except Exception, err:
                 print '\033[91m'+ str(err) + '\033[0m'
         store_file(data, thread_number, PTT_board)
@@ -142,7 +142,7 @@ def add_brackets(PTT_board):
                 my_file.write("[")
             my_file.seek(-1, os.SEEK_END)
             my_file.truncate()
-            my_file.write("]") 
+            my_file.write("]")
 
 class myThread(threading.Thread):
     def __init__(self, PTT_board, begin, end, thread_number):
@@ -155,8 +155,8 @@ class myThread(threading.Thread):
     def run(self):
         crawler(self.PTT_board, self.begin, self.end, self.thread_number, self.data)
 
-if __name__ == "__main__":  
-    PTT_board = str(sys.argv[1]).lower() 
+if __name__ == "__main__":
+    PTT_board = str(sys.argv[1]).lower()
     thread_num = int(sys.argv[2])
     print 'Start parsing [',PTT_board,']....'
     all_page = page_count(PTT_board)
@@ -176,6 +176,6 @@ if __name__ == "__main__":
     for x in threads:
         x.join()
         print "Thread-" + x.thread_number + " Finished"
-    add_brackets(PTT_board) 
+    add_brackets(PTT_board)
     print "Finished Crawling " + PTT_board
 
