@@ -12,14 +12,16 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from six import u
 requests.packages.urllib3.disable_warnings()
-rs=requests.session()
+rs = requests.session()
+
 
 def page_count(PTT_board):
-    res = rs.get('https://www.ptt.cc/bbs/'+PTT_board+'/index.html', cookies={'over18': '1'}, verify=False)
+    res = rs.get('https://www.ptt.cc/bbs/' + PTT_board + '/index.html', cookies={'over18': '1'}, verify=False)
     soup = BeautifulSoup(res.text,'html.parser')
     all_page_url = soup.select('.btn.wide')[1]['href']
-    all_page=int(get_page_num(all_page_url))+1
-    return  all_page
+    all_page=int(get_page_num(all_page_url)) + 1
+    return all_page
+
 
 def parse_link(link , data_to_store):
     # print link
@@ -32,6 +34,7 @@ def parse_link(link , data_to_store):
     main_content = soup.find(id="main-content")
     metas = main_content.select('div.article-metaline')
     author, title, date = '', '', ''
+
     if metas:
         _author=  metas[0].select('span.article-meta-value')[0]
         _title =  metas[1].select('span.article-meta-value')[0]
@@ -48,6 +51,7 @@ def parse_link(link , data_to_store):
 
     # remove and keep push nodes
     pushes = main_content.find_all('div', class_='push')
+
     for push in pushes:
         push.extract()
 
@@ -167,9 +171,9 @@ if __name__ == "__main__":
     # Create new threads
     threads = []
     for i, divide_pages in enumerate(divide_pages_grouped):
-      thread = "thread" + str(i)
-      thread = myThread(PTT_board, divide_pages[0], divide_pages[1], str(i))
-      threads.append(thread)
+        thread = "thread" + str(i)
+        thread = myThread(PTT_board, divide_pages[0], divide_pages[1], str(i))
+        threads.append(thread)
     for x in threads:
         # print "Thread-" + x.thread_number + " Starting"
         x.start()
