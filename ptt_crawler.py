@@ -97,8 +97,6 @@ def crawler(PTT_board, begin, end, thread_number, data):
         for tag in soup.select('div.title'):
             try:
                 atag = tag.find('a')
-                # time = random.uniform(1, 10)/5
-								# sleep(0.1)
                 if(atag):
                     URL=atag['href'].strip()   
                     link='https://www.ptt.cc'+URL
