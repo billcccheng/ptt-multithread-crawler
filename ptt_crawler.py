@@ -49,14 +49,15 @@ def link_exists(URL, last_id):
     regex = '.(\d+).\w{1}'
     p = re.compile(regex)
     doc_id = p.findall(URL) 
-    return int(doc_id[0] ) <= last_id
+    return int(doc_id[0]) <= last_id
 
 
 def store_file(data, thread_number, PTT_board):
     print('\033[91m' + "Storing Thread-" + thread_number + '\033[0m')
-    if not os.path.exists(PTT_board):
-        os.makedirs(PTT_board)
-    FILENAME = PTT_board + '/data-' + thread_number + '.json'
+    dir_path = '../ptt-search-server/boards/' + PTT_board
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    FILENAME = dir_path + '/data-' + thread_number + '.json'
     with codecs.open(FILENAME, 'a', encoding='utf-8') as f:
         if os.stat(FILENAME).st_size == 0:
             f.write("[")
@@ -84,13 +85,13 @@ def group_by(n_list):
     return grouped_list
 
 def add_brackets(PTT_board):
-    cwd = os.getcwd()
-    for _file in os.listdir(cwd + '/' + PTT_board):
+    dir_path = '../ptt-search-server/boards/' + PTT_board
+    for _file in os.listdir(dir_path):
         if(_file == ".DS_Store" or _file == "*.swp"):
             continue
-        _file = cwd + '/' + PTT_board + '/' + _file
-        with open(_file, 'a') as my_file:
-            if os.stat(_file).st_size == 0:
+        file_path = dir_path + '/' + _file
+        with open(file_path, 'a') as my_file:
+            if not os.stat(file_path).st_size:
                 my_file.write("[")
             my_file.seek(-1, os.SEEK_END)
             my_file.truncate()
@@ -120,15 +121,15 @@ if __name__ == "__main__":
     # Create new threads
     threads = []
     for i, divide_pages in enumerate(divide_pages_grouped):
-      thread_name = "thread-" + str(num_of_files + i)
+      thread_name = str(num_of_files + i)
       thread = myThread(PTT_board, divide_pages[0], divide_pages[1], thread_name, latest_doc_id)
       threads.append(thread)
-    for x in threads:
-        print("Thread-" + x.thread_number + " Starting")
-        x.start()
-    for x in threads:
-        x.join()
-        print("Thread-" + x.thread_number + " Finished")
+    for i, thread in enumerate(threads):
+        print("Thread-" + str(i) + " Starting")
+        thread.start()
+    for thread in threads:
+        thread.join()
+        print("Thread-" + thread.thread_number + " Finished")
     add_brackets(PTT_board) 
     print("Exited Thread")
 
