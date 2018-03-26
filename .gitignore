@@ -1,5 +1,6 @@
 .DS_Store
 *.swp
+*.pyc
 studyabroad/
 soft_job/
 tech_job/
