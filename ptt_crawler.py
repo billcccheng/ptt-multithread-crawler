@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# coding=utf-8 
+# coding=utf-8
 import sys
 import requests
 import io
@@ -12,17 +12,17 @@ import parse_link
 import get_doc_id
 from time import sleep
 from datetime import datetime
-from bs4 import BeautifulSoup  
+from bs4 import BeautifulSoup
 requests.packages.urllib3.disable_warnings()
 
 rs=requests.session()
 
 def page_count(PTT_board):
-    res = rs.get('https://www.ptt.cc/bbs/'+PTT_board+'/index.html',verify=False)
+    res = rs.get('https://www.ptt.cc/bbs/'+PTT_board+'/index.html', cookies={'over18': '1'}, verify=False)
     soup = BeautifulSoup(res.text,'html.parser')
     all_page_url = soup.select('.btn.wide')[1]['href']
     all_page=int(get_page_num(all_page_url))+1
-    return  all_page 
+    return  all_page
 
 def crawler(PTT_board, begin, end, thread_number, last_id, data):
     for number in range(begin, end, -1):
@@ -36,10 +36,10 @@ def crawler(PTT_board, begin, end, thread_number, last_id, data):
                 time = random.uniform(1, 5)/5
                 sleep(time)
                 if(atag):
-                    URL=atag['href'].strip()   
+                    URL=atag['href'].strip()
                     link='https://www.ptt.cc'+URL
                     if not link_exists(URL, last_id):
-                        parse_link.parse(link, data)                     
+                        parse_link.parse(link, data)
             except Exception, err:
                 print('\033[91m'+ str(err) + '\033[0m')
         if data:
@@ -48,7 +48,7 @@ def crawler(PTT_board, begin, end, thread_number, last_id, data):
 def link_exists(URL, last_id):
     regex = '.(\d+).\w{1}'
     p = re.compile(regex)
-    doc_id = p.findall(URL) 
+    doc_id = p.findall(URL)
     return int(doc_id[0]) <= last_id
 
 
@@ -95,7 +95,7 @@ def add_brackets(PTT_board):
                 my_file.write("[")
             my_file.seek(-1, os.SEEK_END)
             my_file.truncate()
-            my_file.write("]") 
+            my_file.write("]")
 
 class myThread(threading.Thread):
     def __init__(self, PTT_board, begin, end, thread_number, latest_doc_id):
@@ -104,13 +104,13 @@ class myThread(threading.Thread):
         self.begin = begin
         self.end = end
         self.thread_number = thread_number
-        self.last_id = latest_doc_id 
+        self.last_id = latest_doc_id
         self.data = list()
     def run(self):
         crawler(self.PTT_board, self.begin, self.end, self.thread_number, self.last_id, self.data)
 
-if __name__ == "__main__":  
-    PTT_board = str(sys.argv[1]).lower() 
+if __name__ == "__main__":
+    PTT_board = str(sys.argv[1]).lower()
     thread_num = int(sys.argv[2])
     print('Start parsing [',PTT_board,']....')
     all_page = page_count(PTT_board)
@@ -130,6 +130,6 @@ if __name__ == "__main__":
     for thread in threads:
         thread.join()
         print("Thread-" + thread.thread_number + " Finished")
-    add_brackets(PTT_board) 
+    add_brackets(PTT_board)
     print("Exited Thread")
 
