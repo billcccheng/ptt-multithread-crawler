@@ -27,7 +27,7 @@ def page_count(PTT_board):
 def crawler(PTT_board, begin, end, thread_number, last_id, data):
     for number in range(begin, end, -1):
         _url = 'https://www.ptt.cc/bbs/'+PTT_board+'/index'+str(number)+'.html'
-        res=rs.get(_url,verify=False)
+        res=rs.get(_url, cookies={'over18': '1'}, verify=False)
         soup = BeautifulSoup(res.text,'html.parser')
         data = []
         for tag in soup.select('div.title'):
