@@ -49,7 +49,7 @@ def parse(link , data_to_store):
     filtered = [_f for _f in filtered if _f]  # remove empty strings
     content = ' '.join(filtered)
     content = re.sub(r'(\s)+', ' ', content)
-    messages = []
+    messages = {}
     for push in pushes:
         if not push.find('span', 'push-tag'):
             continue
@@ -58,7 +58,10 @@ def parse(link , data_to_store):
         push_content = push.find('span', 'push-content').strings
         push_content = ' '.join(push_content)[1:].strip(' \t\n\r')  # remove ':'
         push_ipdatetime = push.find('span', 'push-ipdatetime').string.strip(' \t\n\r')
-        messages.append(push_userid + ":" + push_content)
+        messages[push_userid] = {
+            'content': push_content,
+            'ip_and_date': push_ipdatetime,
+        }
 
     data = {
         'title': title,
@@ -67,7 +70,7 @@ def parse(link , data_to_store):
         'date': date,
         'content': content,
         'ip': ip,
-        'messages': " ".join(messages)
+        'messages': messages
     }
     data_to_store.append(json.dumps(data, sort_keys=False, ensure_ascii=False)+",")
 
